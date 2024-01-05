@@ -1,155 +1,84 @@
-﻿import random
-from math import sin, cos, pi, log
-from tkinter import *
+<script type="text/javascript">
+    function createHeart(sourceId, resultId) {
+        objSource = window.document.getElementById(sourceId);
+        objResult = window.document.getElementById(resultId);
 
-CANVAS_WIDTH = 640  
-CANVAS_HEIGHT = 480  
-CANVAS_CENTER_X = CANVAS_WIDTH / 2  
-CANVAS_CENTER_Y = CANVAS_HEIGHT / 2  
-IMAGE_ENLARGE = 11  
-HEART_COLOR = "#f76070"  #chỉnh màu ở đây
+        if (objSource.value.length == 0) {
+            alert("Vui lòng nhập nội dung cần tạo trái tim!");
+            return false;
+        }
 
-def heart_function(t, shrink_ratio: float = IMAGE_ENLARGE):
+        string = objSource.value;
 
-    x = 16 * (sin(t) ** 3)
-    y = -(13 * cos(t) - 5 * cos(2 * t) - 2 * cos(3 * t) - cos(4 * t))
+        heart = "";
+        heart += "_________" + partString(string, 8) + "____________" + partString(string, 9) + "\n";
+        heart += "______" + partString(string, 12) + "_______" + partString(string, 15) + "\n";
+        heart += "____" + partString(string, 17) + "___" + partString(string, 18) + "\n";
+        heart += "___" + partString(string, 41) + "\n";
+        heart += "__" + partString(string, 44) + "\n";
+        heart += "_" + partString(string, 46) + "\n";
+        heart += "_" + partString(string, 46) + "\n";
+        heart += partString(string, 47) + "\n";
+        heart += partString(string, 47) + "\n";
+        heart += partString(string, 46) + "\n";
+        heart += partString(string, 45) + "\n";
+        heart += "_" + partString(string, 43) + "\n";
+        heart += "__" + partString(string, 41) + "\n";
+        heart += "____" + partString(string, 38) + "\n";
+        heart += "______" + partString(string, 34) + "\n";
+        heart += "_________" + partString(string, 28) + "\n";
+        heart += "____________" + partString(string, 22) + "\n";
+        heart += "______________" + partString(string, 18) + "\n";
+        heart += "_________________" + partString(string, 13) + "\n";
+        heart += "___________________" + partString(string, 9) + "\n";
+        heart += "_____________________" + partString(string, 6) + "\n";
+        heart += "______________________" + partString(string, 4) + "\n";
+        heart += "_______________________" + partString(string, 2) + "\n";
 
-    x *= shrink_ratio
-    y *= shrink_ratio
+        objResult.value = heart;
+    }
 
- 
-    x += CANVAS_CENTER_X
-    y += CANVAS_CENTER_Y
+    function partString(string, num) {
+        if (string.length >= num)
+            return string.substring(0, num);
 
-    return int(x), int(y)
+        repeat = Math.ceil(num / string.length);
 
+        newString = "";
 
-def scatter_inside(x, y, beta=0.15):
+        for (i = 0; i < repeat; i++)
+            newString += string;
 
-    ratio_x = - beta * log(random.random())
-    ratio_y = - beta * log(random.random())
-
-    dx = ratio_x * (x - CANVAS_CENTER_X)
-    dy = ratio_y * (y - CANVAS_CENTER_Y)
-
-    return x - dx, y - dy
-
-
-def shrink(x, y, ratio):
- 
-    force = -1 / (((x - CANVAS_CENTER_X) ** 2 + (y - CANVAS_CENTER_Y) ** 2) ** 0.6)  
-    dx = ratio * force * (x - CANVAS_CENTER_X)
-    dy = ratio * force * (y - CANVAS_CENTER_Y)
-    return x - dx, y - dy
-
-
-def curve(p):
-  
-    return 2 * (2 * sin(4 * p)) / (2 * pi)
-
-
-class Heart:
-  
-
-    def __init__(self, generate_frame=20):
-        self._points = set()  
-        self._edge_diffusion_points = set()  
-        self._center_diffusion_points = set()  
-        self.all_points = {}  
-        self.build(2000)
-
-        self.random_halo = 1000
-
-        self.generate_frame = generate_frame
-        for frame in range(generate_frame):
-            self.calc(frame)
-
-    def build(self, number):
+        return newString.substring(0, num);
+    }
+</script>
+<p align="center">
+    <br>
+    <input id="text" name="text" size="37" placeholder='Nhập nội dung cần làm thành hình trái tim'>
+</p>
+<p align="center">
+    <button name="Create Heart" accesskey="g" onclick="return createHeart('text', 'result');" value="Tạo trái tim" type="button">Tạo trái tim</button>
+</p>
+<p align="center">Copy hình vừa tạo thôi</p>
+<textarea cols="45" rows="23" readonly="readonly" wrap="OFF" id="result" onclick="this.focus(); this.select();"></textarea>
+<style>
+    input {
+        display: block;
+        width: 100%;
+        padding: 14px 20px;
+        outline: 0;
+        border: 0;
+        border-radius: .25rem;
+        font-size: 14px;
+        background-color: #f3f6f9;
+        height: 3em;
+    }
     
-        for _ in range(number):
-            t = random.uniform(0, 2 * pi)  
-            x, y = heart_function(t)
-            self._points.add((x, y))
-
-       
-        for _x, _y in list(self._points):
-            for _ in range(3):
-                x, y = scatter_inside(_x, _y, 0.05)
-                self._edge_diffusion_points.add((x, y))
-
+    button:active {
+        border: 0
+    }
     
-        point_list = list(self._points)
-        for _ in range(4000):
-            x, y = random.choice(point_list)
-            x, y = scatter_inside(x, y, 0.17)
-            self._center_diffusion_points.add((x, y))
-
-    @staticmethod
-    def calc_position(x, y, ratio):
-        
-        force = 1 / (((x - CANVAS_CENTER_X) ** 2 + (y - CANVAS_CENTER_Y) ** 2) ** 0.520) 
-
-        dx = ratio * force * (x - CANVAS_CENTER_X) + random.randint(-1, 1)
-        dy = ratio * force * (y - CANVAS_CENTER_Y) + random.randint(-1, 1)
-
-        return x - dx, y - dy
-
-    def calc(self, generate_frame):
-        ratio = 10 * curve(generate_frame / 10 * pi)  
-
-        halo_radius = int(4 + 6 * (1 + curve(generate_frame / 10 * pi)))
-        halo_number = int(3000 + 4000 * abs(curve(generate_frame / 10 * pi) ** 2))
-
-        all_points = []
-
-      
-        heart_halo_point = set()  
-        for _ in range(halo_number):
-            t = random.uniform(0, 2 * pi)  
-            x, y = heart_function(t, shrink_ratio=11.6)  
-            x, y = shrink(x, y, halo_radius)
-            if (x, y) not in heart_halo_point:
-           
-                heart_halo_point.add((x, y))
-                x += random.randint(-14, 14)
-                y += random.randint(-14, 14)
-                size = random.choice((1, 2, 2))
-                all_points.append((x, y, size))
-
-  
-        for x, y in self._points:
-            x, y = self.calc_position(x, y, ratio)
-            size = random.randint(1, 3)
-            all_points.append((x, y, size))
-
-      
-        for x, y in self._edge_diffusion_points:
-            x, y = self.calc_position(x, y, ratio)
-            size = random.randint(1, 2)
-            all_points.append((x, y, size))
-
-        for x, y in self._center_diffusion_points:
-            x, y = self.calc_position(x, y, ratio)
-            size = random.randint(1, 2)
-            all_points.append((x, y, size))
-
-        self.all_points[generate_frame] = all_points
-
-    def render(self, render_canvas, render_frame):
-        for x, y, size in self.all_points[render_frame % self.generate_frame]:
-            render_canvas.create_rectangle(x, y, x + size, y + size, width=0, fill=HEART_COLOR)
-
-
-def draw(main: Tk, render_canvas: Canvas, render_heart: Heart, render_frame=0):
-    render_canvas.delete('all')
-    render_heart.render(render_canvas, render_frame)
-    main.after(160, draw, main, render_canvas, render_heart, render_frame + 1)
-
-
-if __name__ == '__main__':
-    root = Tk()  
-    canvas = Canvas(root, bg='black', height=CANVAS_HEIGHT, width=CANVAS_WIDTH)
-    canvas.pack()
-    heart = Heart()  
-    draw(root, canvas, heart)  
-    root.mainloop()
+    .page-wrapper {
+        height: 80vh
+    }
+</style>
